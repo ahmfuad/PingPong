@@ -14,7 +14,7 @@ router.post('/register', async (req, res) => {
             return;
         }
         password = await bcrypt.hash(password, 10);
-        console.log(password);
+        //console.log(password);
         var mob = [];
         mob[0]=mobile;
         pool.query("INSERT INTO APPUSER (first_name, last_name, date_of_birth, mobile_no, bio, password, address, email) VALUES ($1, $2, $3::date, $4::int[], $5, $6, $7::character(255), $8)", [firstName, lastName, dob, mob, bio, password, address, email], ( err , row)=>{
