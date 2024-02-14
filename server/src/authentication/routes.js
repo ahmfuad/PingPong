@@ -147,6 +147,51 @@ router.post('/chat/send', (req , res) => {
         res.status(200).json({success: "Message Sent Successfully!"});
     });
     
-})
+});
+
+// https://github.com/markedjs/marked will be using this to render
+router.post('/blogs/create', async (req, res)=>{
+    let {title, user_id, maintext} = req.query;
+    //console.log(text)
+    pool.query("INSERT INTO blogs (title, user_id, maintext, posttime) VALUES ($1,$2,$3, CURRENT_TIMESTAMP)", [title, user_id, maintext], (err, row) => {
+        if(err) throw err;
+        res.status(200).json({success: "Blog Created Successfully!"});
+    });
+});
+
+router.post('/blogs/update/:id',async (req, res) => {
+    let {title, user_id, maintext} = req.query;
+    const id = req.params.id;
+    pool.query("UPDATE blogs SET title=$1, maintext=$2, posttime = CURRENT_TIMESTAMP WHERE id=$3", [title, maintext, id], (err, row)=>{
+        if(err) throw err;
+        res.status(200).json({success: "Blog Updated Successfully!"});
+    });
+});
+
+router.post('/blogreply', async (req, res) => {
+    console.log(req.query);
+    try {
+        blog_id = req.query.blog_id;
+        user_id = req.query.user_id;
+        message = req.query.message;
+        try {
+            reply_id = req.query.reply_id;
+        }
+        catch(err) {
+            reply_id = null;
+        }
+        if(!reply_id) {
+            pool.query("INSERT INTO REPLY (BLOG_ID, USER_ID, MESSAGE, COMMENT01) VALUES ($1, $2, $3, 1)", [blog_id, user_id, message]);
+        }
+        else
+        {
+            pool.query("INSERT INTO REPLY (BLOG_ID, USER_ID, MESSAGE, reply_id, COMMENT01) VALUES ($1, $2, $3, $4, 0)", [blog_id, user_id, message, reply_id]);
+
+        }
+        return res.status(200).json({success: "Reply Added"});
+    } catch (err) {
+        if (err) throw err;
+    }
+});
 
 module.exports = router;
