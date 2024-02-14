@@ -96,7 +96,16 @@ router.post('/createproject', async (req, res) => {
 
 router.post('/createfolder', async (req, res) => {
     try {
-        let { name, project_id, parent_id } = req.query;
+        let { name, user_id, project_id, parent_id } = req.query;
+        let valid = 0;
+        const allRows = await pool.query("SELECT * FROM PROJECT WHERE id=$1", [project_id]);
+        if(Object.values(allRows.rows[0].user_id).indexOf((+user_id))>-1) {
+            valid = 1;
+        }
+
+        if(valid !== 1) {
+            return res.status(201).json({error: "Access Denied!"});
+        }
         const folder_id = await pool.query("INSERT INTO FOLDER (NAME, PROJECT_ID, prevFolderID) VALUES ($1, $2, $3) RETURNING ID", [name, project_id, parent_id]);
         pool.query("UPDATE FOLDER SET nextFolderID = ARRAY_APPEND(nextFolderID, $1) WHERE ID = $2", [folder_id.rows[0].id, parent_id]);
         return res.status(200).json({success: "Folder Created"});
