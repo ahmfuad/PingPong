@@ -83,10 +83,23 @@ router.post('/createproject', async (req, res) => {
         date_of_creation = req.query.doc;
         visibility = req.query.visibility;
         //let { user_id, name, date_of_creation, visibility } = req.query;
-        pool.query("INSERT INTO PROJECT (USER_ID, NAME, DATE_OF_CREATION, VISIBILITY) VALUES (($1), $2, $3, $4)", [user_id, nam, date_of_creation, visibility], (err, row) => {
-            if (err) throw err;
-            res.status(200).json({ status: 200, message: "Successfully Registered!" });
-        });
+        const project_id = await pool.query("INSERT INTO PROJECT (USER_ID, NAME, DATE_OF_CREATION, VISIBILITY) VALUES (($1), $2, CURRENT_DATE, $3) returning id", [user_id, nam, visibility]);
+        const folder_id = await pool.query("INSERT INTO FOLDER (NAME) VALUES ($1) RETURNING ID", [nam+"-root"]);
+        pool.query("update project set folder_id = $1 where id = $2", [folder_id.rows[0].id, project_id.rows[0].id]);
+        console.log(folder_id.rows[0].id);
+        console.log(project_id.rows[0].id);
+        return res.status(200).json({success: "Project Created"});
+    } catch (err) {
+        if (err) throw err;
+    }
+});
+
+router.post('/createfolder', async (req, res) => {
+    try {
+        let { name, project_id, parent_id } = req.query;
+        const folder_id = await pool.query("INSERT INTO FOLDER (NAME, PROJECT_ID, prevFolderID) VALUES ($1, $2, $3) RETURNING ID", [name, project_id, parent_id]);
+        pool.query("UPDATE FOLDER SET nextFolderID = ARRAY_APPEND(nextFolderID, $1) WHERE ID = $2", [folder_id.rows[0].id, parent_id]);
+        return res.status(200).json({success: "Folder Created"});
     } catch (err) {
         if (err) throw err;
     }
