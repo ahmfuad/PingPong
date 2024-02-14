@@ -128,4 +128,16 @@ router.put('/addauthor', async (req, res) => {
     }
 });
 
+router.post('/chat/send', (req , res) => {
+    let {idFrom, idTo, message} = req.query;
+    //let datetime = Date.now();
+    //console.log(datetime);
+
+    pool.query("INSERT INTO CHATUSER (message, datetime, sender, receiver) VALUES ($1, CURRENT_TIMESTAMP, $2, $3)", [message, idFrom, idTo], (err, row) =>{
+        if(err) throw err;
+        res.status(200).json({success: "Message Sent Successfully!"});
+    });
+    
+})
+
 module.exports = router;
