@@ -137,7 +137,63 @@ router.post('/chat/send', (req , res) => {
         if(err) throw err;
         res.status(200).json({success: "Message Sent Successfully!"});
     });
-    
-})
+});
+
+router.get('/chat/get', (req, res) => {
+    let {idFrom, idTo} = req.query;
+    pool.query("SELECT * FROM CHATUSER WHERE (sender = $1 AND receiver = $2) OR (sender = $2 AND receiver = $1) ORDER BY datetime", [idFrom, idTo], (err, row) =>{
+        if(err) throw err;
+        res.status(200).json({messages: row.rows});
+    });
+});
+
+router.post('/createfile', async (req, res) => {
+    console.log(req.query);
+    try {
+        let { name, folder_id, file_type, blob } = req.query;
+        pool.query("INSERT INTO FILEPROJECT (NAME, FOLDER_ID, EXTENSION, blob) VALUES ($1, $2, $3, $4)", [name, folder_id, file_type, blob], (err, row) => {
+            if (err) return res.status(201).json({error: "File Couldn't Add"});;
+        });
+        return res.status(200).json({success: "File Added"});
+    } catch (err) {
+        if (err) throw err;
+    }
+});
+
+router.get('/searchuser', async (req, res) => {
+    try {
+        // Add wildcard (%) to both sides of the search string to perform substring matching
+        const searchName = req.query.name;
+
+        // Modify the SQL query to perform case-insensitive and gap-insensitive searching
+        const users = await pool.query(
+            "SELECT * FROM APPUSER WHERE lower(trim(first_name) || trim(last_name)) LIKE lower(trim($1))::text",
+            [searchName]
+        );
+
+        res.json({ users: users.rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+router.get('/searchproject', async (req, res) => {
+    try {
+        // Add wildcard (%) to both sides of the search string to perform substring matching
+        const searchName = req.query.name;
+
+        // Modify the SQL query to perform case-insensitive and gap-insensitive searching
+        const users = await pool.query(
+            "SELECT * FROM project WHERE lower(name) LIKE lower(trim($1))::text",
+            [searchName]
+        );
+
+        res.json({ users: users.rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
 
 module.exports = router;
