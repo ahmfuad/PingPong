@@ -96,7 +96,16 @@ router.post('/createproject', async (req, res) => {
 
 router.post('/createfolder', async (req, res) => {
     try {
-        let { name, project_id, parent_id } = req.query;
+        let { name, user_id, project_id, parent_id } = req.query;
+        let valid = 0;
+        const allRows = await pool.query("SELECT * FROM PROJECT WHERE id=$1", [project_id]);
+        if(Object.values(allRows.rows[0].user_id).indexOf((+user_id))>-1) {
+            valid = 1;
+        }
+
+        if(valid !== 1) {
+            return res.status(201).json({error: "Access Denied!"});
+        }
         const folder_id = await pool.query("INSERT INTO FOLDER (NAME, PROJECT_ID, prevFolderID) VALUES ($1, $2, $3) RETURNING ID", [name, project_id, parent_id]);
         pool.query("UPDATE FOLDER SET nextFolderID = ARRAY_APPEND(nextFolderID, $1) WHERE ID = $2", [folder_id.rows[0].id, parent_id]);
         return res.status(200).json({success: "Folder Created"});
@@ -137,6 +146,7 @@ router.post('/chat/send', (req , res) => {
         if(err) throw err;
         res.status(200).json({success: "Message Sent Successfully!"});
     });
+<<<<<<< HEAD
 });
 
 router.get('/chat/get', (req, res) => {
@@ -155,10 +165,56 @@ router.post('/createfile', async (req, res) => {
             if (err) return res.status(201).json({error: "File Couldn't Add"});;
         });
         return res.status(200).json({success: "File Added"});
+=======
+    
+});
+
+// https://github.com/markedjs/marked will be using this to render
+router.post('/blogs/create', async (req, res)=>{
+    let {title, user_id, maintext} = req.query;
+    //console.log(text)
+    pool.query("INSERT INTO blogs (title, user_id, maintext, posttime) VALUES ($1,$2,$3, CURRENT_TIMESTAMP)", [title, user_id, maintext], (err, row) => {
+        if(err) throw err;
+        res.status(200).json({success: "Blog Created Successfully!"});
+    });
+});
+
+router.post('/blogs/update/:id',async (req, res) => {
+    let {title, user_id, maintext} = req.query;
+    const id = req.params.id;
+    pool.query("UPDATE blogs SET title=$1, maintext=$2, posttime = CURRENT_TIMESTAMP WHERE id=$3", [title, maintext, id], (err, row)=>{
+        if(err) throw err;
+        res.status(200).json({success: "Blog Updated Successfully!"});
+    });
+});
+
+router.post('/blogreply', async (req, res) => {
+    console.log(req.query);
+    try {
+        blog_id = req.query.blog_id;
+        user_id = req.query.user_id;
+        message = req.query.message;
+        try {
+            reply_id = req.query.reply_id;
+        }
+        catch(err) {
+            reply_id = null;
+        }
+        if(!reply_id) {
+            pool.query("INSERT INTO REPLY (BLOG_ID, USER_ID, MESSAGE, COMMENT01) VALUES ($1, $2, $3, 1)", [blog_id, user_id, message]);
+        }
+        else
+        {
+            pool.query("INSERT INTO REPLY (BLOG_ID, USER_ID, MESSAGE, reply_id, COMMENT01) VALUES ($1, $2, $3, $4, 0)", [blog_id, user_id, message, reply_id]);
+
+        }
+        return res.status(200).json({success: "Reply Added"});
+>>>>>>> 62e3d4ea01cf44c2407fcea221e376c81573769a
     } catch (err) {
         if (err) throw err;
     }
 });
+<<<<<<< HEAD
 
 router.get('/searchuser', async (req, res) => {
     try {
@@ -195,5 +251,7 @@ router.get('/searchproject', async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 });
+=======
+>>>>>>> 62e3d4ea01cf44c2407fcea221e376c81573769a
 
 module.exports = router;
