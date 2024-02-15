@@ -8,6 +8,9 @@ const pool = require('../../db');
 router.post('/register', async (req, res) => {
     try{
         let {firstName, lastName, dob, mobile, bio, password, address, email, image} = req.query;
+        if(firstName === undefined || lastName === undefined || mobile === undefined || password === undefined || email===undefined) {
+            return res.status(401).json({error: "Undefined behavior"});
+        }
         const val = await pool.query("SELECT * FROM APPUSER WHERE email=$1::text", [email]);
         if(val.rows.length>0) {
             res.status(401).json({error: "Email is used!"});
@@ -30,6 +33,9 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         //console.log(req.query);
+        if(req.query.email === undefined || req.query.password === undefined) {
+            return res.status(401).json({error: "Undefined behavior"});
+        }
         const users = await pool.query("SELECT * FROM APPUSER WHERE email=$1::text", [req.query.email])
         //res.json({users: users.rows});
         if(users.rows.length!=0) {
@@ -52,9 +58,12 @@ router.post('/login', async (req, res) => {
 });
 
 router.put('/update', async (req, res) => {
-    console.log(req.query);
+    //console.log(req.query);
     try {
         let {firstName, lastName, dob, mobile, image, bio, password, address, email} = req.query;
+        if(firstName === undefined || lastName === undefined || mobile === undefined || password === undefined || email===undefined) {
+            return res.status(403).json({error: "Undefined behavior"});
+        }
         const val = await pool.query("SELECT * FROM APPUSER WHERE email=$1::text", [email]);
         if(val.rows.length==0) {
             res.status(401).json({error: "Email is not registered!"});
@@ -74,7 +83,7 @@ router.put('/update', async (req, res) => {
 });
 
 router.post('/createproject', async (req, res) => {
-    console.log(req.query);
+    //console.log(req.query);
     try {
         user_id = [];
         user_id = req.query.userID;
@@ -82,6 +91,9 @@ router.post('/createproject', async (req, res) => {
         //name = req.query.name;
         date_of_creation = req.query.doc;
         visibility = req.query.visibility;
+        if(user_id === undefined || nam=== undefined || date_of_creation === undefined || visibility === undefined) {
+            return res.status(403).json({error: "Undefined behavior"});
+        }
         //let { user_id, name, date_of_creation, visibility } = req.query;
         const project_id = await pool.query("INSERT INTO PROJECT (USER_ID, NAME, DATE_OF_CREATION, VISIBILITY) VALUES (($1), $2, CURRENT_DATE, $3) returning id", [user_id, nam, visibility]);
         const folder_id = await pool.query("INSERT INTO FOLDER (NAME) VALUES ($1) RETURNING ID", [nam+"-root"]);
@@ -97,6 +109,9 @@ router.post('/createproject', async (req, res) => {
 router.post('/createfolder', async (req, res) => {
     try {
         let { name, user_id, project_id, parent_id } = req.query;
+        if(name === undefined || user_id === undefined || project_id === undefined) {
+            return res.status(401).json({error: "Undefined behavior"});
+        }
         let valid = 0;
         const allRows = await pool.query("SELECT * FROM PROJECT WHERE id=$1", [project_id]);
         if(Object.values(allRows.rows[0].user_id).indexOf((+user_id))>-1) {
@@ -117,10 +132,10 @@ router.post('/createfolder', async (req, res) => {
 router.put('/addauthor', async (req, res) => {
     try {
         const { user_id, project_id } = req.query; // Assuming you also have project_id
-        
+    
         // Check if project_id and user_id are provided
         if (!project_id || !user_id) {
-            return res.status(400).json({ status: 400, message: 'Both project_id and user_id are required' });
+            return res.status(403).json({ status: 400, message: 'Both project_id and user_id are required' });
         }
         // Update the user_id array in the Project table
         pool.query(
@@ -137,59 +152,50 @@ router.put('/addauthor', async (req, res) => {
     }
 });
 
-router.post('/chat/send', (req , res) => {
+router.post('/chat/send', async (req , res) => {
     let {idFrom, idTo, message} = req.query;
     //let datetime = Date.now();
     //console.log(datetime);
-
+    if(idFrom === undefined || idTo === undefined || message === undefined) {
+        return res.status(403).json({error: "Undefined behavior"});
+    }
     pool.query("INSERT INTO CHATUSER (message, datetime, sender, receiver) VALUES ($1, CURRENT_TIMESTAMP, $2, $3)", [message, idFrom, idTo], (err, row) =>{
         if(err) throw err;
         res.status(200).json({success: "Message Sent Successfully!"});
     });
-<<<<<<< HEAD
-});
-
-router.get('/chat/get', (req, res) => {
-    let {idFrom, idTo} = req.query;
-    pool.query("SELECT * FROM CHATUSER WHERE (sender = $1 AND receiver = $2) OR (sender = $2 AND receiver = $1) ORDER BY datetime", [idFrom, idTo], (err, row) =>{
-        if(err) throw err;
-        res.status(200).json({messages: row.rows});
-    });
-});
-
-router.post('/createfile', async (req, res) => {
-    console.log(req.query);
-    try {
-        let { name, folder_id, file_type, blob } = req.query;
-        pool.query("INSERT INTO FILEPROJECT (NAME, FOLDER_ID, EXTENSION, blob) VALUES ($1, $2, $3, $4)", [name, folder_id, file_type, blob], (err, row) => {
-            if (err) return res.status(201).json({error: "File Couldn't Add"});;
-        });
-        return res.status(200).json({success: "File Added"});
-=======
     
-});
+})
+
 
 // https://github.com/markedjs/marked will be using this to render
 router.post('/blogs/create', async (req, res)=>{
     let {title, user_id, maintext} = req.query;
+    if(title === undefined || user_id === undefined || maintext === undefined) {
+        return res.status(403).json({error: "Undefined behavior"});
+    }
     //console.log(text)
     pool.query("INSERT INTO blogs (title, user_id, maintext, posttime) VALUES ($1,$2,$3, CURRENT_TIMESTAMP)", [title, user_id, maintext], (err, row) => {
         if(err) throw err;
         res.status(200).json({success: "Blog Created Successfully!"});
     });
-});
+})
 
 router.post('/blogs/update/:id',async (req, res) => {
     let {title, user_id, maintext} = req.query;
+    //if()
     const id = req.params.id;
+    //console.log(id, title, main)
+    if(id === undefined || title === undefined || maintext === undefined || user_id === undefined) {
+        return res.status(403).json({error: "Undefined behavior"});
+    }
     pool.query("UPDATE blogs SET title=$1, maintext=$2, posttime = CURRENT_TIMESTAMP WHERE id=$3", [title, maintext, id], (err, row)=>{
         if(err) throw err;
         res.status(200).json({success: "Blog Updated Successfully!"});
-    });
-});
+    })
+})
 
 router.post('/blogreply', async (req, res) => {
-    console.log(req.query);
+    //console.log(req.query);
     try {
         blog_id = req.query.blog_id;
         user_id = req.query.user_id;
@@ -209,49 +215,9 @@ router.post('/blogreply', async (req, res) => {
 
         }
         return res.status(200).json({success: "Reply Added"});
->>>>>>> 62e3d4ea01cf44c2407fcea221e376c81573769a
     } catch (err) {
         if (err) throw err;
     }
 });
-<<<<<<< HEAD
-
-router.get('/searchuser', async (req, res) => {
-    try {
-        // Add wildcard (%) to both sides of the search string to perform substring matching
-        const searchName = req.query.name;
-
-        // Modify the SQL query to perform case-insensitive and gap-insensitive searching
-        const users = await pool.query(
-            "SELECT * FROM APPUSER WHERE lower(trim(first_name) || trim(last_name)) LIKE lower(trim($1))::text",
-            [searchName]
-        );
-
-        res.json({ users: users.rows });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Internal Server Error" });
-    }
-});
-
-router.get('/searchproject', async (req, res) => {
-    try {
-        // Add wildcard (%) to both sides of the search string to perform substring matching
-        const searchName = req.query.name;
-
-        // Modify the SQL query to perform case-insensitive and gap-insensitive searching
-        const users = await pool.query(
-            "SELECT * FROM project WHERE lower(name) LIKE lower(trim($1))::text",
-            [searchName]
-        );
-
-        res.json({ users: users.rows });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Internal Server Error" });
-    }
-});
-=======
->>>>>>> 62e3d4ea01cf44c2407fcea221e376c81573769a
 
 module.exports = router;
