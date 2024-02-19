@@ -1,5 +1,5 @@
 # PingPong
-Solution made for DevSprint 2024 by Team PingPong. 
+DevSprint 2024 project by Team PingPong. 
 
 - [PingPong](#pingpong)
   * [Stacks Needed](#stacks-needed)
