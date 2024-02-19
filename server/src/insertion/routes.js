@@ -9,7 +9,7 @@ router.post('/register', async (req, res) => {
     try{
         let {firstName, lastName, dob, mobile, bio, password, address, email, image} = req.query;
         if(firstName === undefined || lastName === undefined || mobile === undefined || password === undefined || email===undefined) {
-            return res.status(401).json({error: "Undefined behavior"});
+            return res.status(400).json({error: "Undefined behavior"});
         }
         const val = await pool.query("SELECT * FROM APPUSER WHERE email=$1::text", [email]);
         if(val.rows.length>0) {
@@ -39,7 +39,7 @@ router.put('/update', async (req, res) => {
     try {
         let {firstName, lastName, dob, mobile, image, bio, password, address, email} = req.query;
         if(firstName === undefined || lastName === undefined || mobile === undefined || password === undefined || email===undefined) {
-            return res.status(403).json({error: "Undefined behavior"});
+            return res.status(400).json({error: "Undefined behavior"});
         }
         const val = await pool.query("SELECT * FROM APPUSER WHERE email=$1::text", [email]);
         if(val.rows.length==0) {
@@ -144,7 +144,7 @@ router.post('/chat/send', async (req , res) => {
     //let datetime = Date.now();
     //console.log(datetime);
     if(idFrom === undefined || idTo === undefined || message === undefined) {
-        return res.status(403).json({error: "Undefined behavior"});
+        return res.status(400).json({error: "Undefined behavior"});
     }
     pool.query("INSERT INTO CHATUSER (message, datetime, sender, receiver) VALUES ($1, CURRENT_TIMESTAMP, $2, $3)", [message, idFrom, idTo], (err, row) =>{
         if(err) throw err;
@@ -158,7 +158,7 @@ router.post('/chat/send', async (req , res) => {
 router.post('/blogs/create', async (req, res)=>{
     let {title, user_id, maintext} = req.query;
     if(title === undefined || user_id === undefined || maintext === undefined) {
-        return res.status(403).json({error: "Undefined behavior"});
+        return res.status(400).json({error: "Undefined behavior"});
     }
     //console.log(text)
     pool.query("INSERT INTO blogs (title, user_id, maintext, posttime) VALUES ($1,$2,$3, CURRENT_TIMESTAMP)", [title, user_id, maintext], (err, row) => {
@@ -173,7 +173,7 @@ router.post('/blogs/update/:id',async (req, res) => {
     const id = req.params.id;
     //console.log(id, title, main)
     if(id === undefined || title === undefined || maintext === undefined || user_id === undefined) {
-        return res.status(403).json({error: "Undefined behavior"});
+        return res.status(400).json({error: "Undefined behavior"});
     }
     pool.query("UPDATE blogs SET title=$1, maintext=$2, posttime = CURRENT_TIMESTAMP WHERE id=$3", [title, maintext, id], (err, row)=>{
         if(err) throw err;

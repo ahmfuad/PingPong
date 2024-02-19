@@ -29,15 +29,15 @@ app.get("/", (req, res) => {
 })
 
 app.use('/api/', authRoutes);
-app.use(require("./src/login"));
-app.use(require("./src/logout"));
-app.use(require("./src/getUser"));
-app.use(require("./src/getProject"));
-app.use(require("./src/chat"));
-app.use(require("./src/blog"));
-app.use(require("./src/comments"));
-app.use(require("./src/folders"));
-app.use(require("./src/files"));
+app.use('/api/', require("./src/login"));
+app.use('/api/', require("./src/logout"));
+app.use('/api/', require("./src/getUser"));
+app.use('/api/', require("./src/getProject"));
+app.use('/api/', require("./src/chat"));
+app.use('/api/', require("./src/blog"));
+app.use('/api/', require("./src/comments"));
+app.use('/api/', require("./src/folders"));
+app.use('/api/', require("./src/files"));
 
 
 app.listen(port, () => console.log(`Running on port ${port}`));

@@ -33,11 +33,11 @@ router.post("/login", async (req, res) => {
                 return res.status(200).json({success: "Login Successful!", user: users.rows[0].first_name, token});
             } 
             else {
-                return res.status(401).json({error: "Invalid Email/Password"});
+                return res.status(402).json({error: "Invalid Email/Password"});
             }
         }
         else {
-            return res.status(401).json({error: "Invalid Email/Password"});
+            return res.status(402).json({error: "Invalid Email/Password"});
         }
     }
     catch(err) {

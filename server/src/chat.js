@@ -12,7 +12,7 @@ router.get('/chat/:from/:to',userAuth, async (req, res)=>{
         }
         else {
             if(row.rows.length==0) {
-                res.status(200).json({success: "No messagaes!"});
+                res.status(403).json({error: "No messagaes!"});
             }
             else {
                 res.status(200).json({messages: row.rows})
