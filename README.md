@@ -6,16 +6,6 @@ Solution made for DevSprint 2024 by Team PingPong.
   * [Installation](#installation)
   * [Configuration](#configuration)
   * [Routes](#routes)
-    + [Register](#register)
-    + [Update User](#update-user)
-    + [Create Project](#create-project)
-    + [Create Folder](#create-folder)
-    + [Add Author](#add-author)
-    + [Send Message](#send-message)
-    + [Create Blog](#create-blog)
-    + [Update Blog](#update-blog)
-    + [Add Comment/Reply to a blog](#add-comment-reply-to-a-blog)
-
 
 ## Stacks Needed
 - Running PostgreSQL Server (port 3000 is used)
@@ -70,6 +60,33 @@ URL: ``/api/register`` | Method: ``POST``
 - `Status: 401` : Email is used
 - `Status: 200` : Successfully Registered
 
+### Login
+URL: ``/api/login`` | Method: ``POST``
+
+|key|description|
+|---|-----------|
+|email| email of the user `*Required`|
+|password| password set by the user `*Required`|'
+
+#### Response
+- `Status 400` : Internal Error
+- `Status 401` : Undefined Behavior
+- `Status 402` : Invalid Email/Password
+- `Status 200` :
+  ```json
+  {
+    "success": "Login Successful!",
+    "user": "First Name of the user",
+    "token": "generated authorization token"
+  }
+  ```
+
+### Logout
+URL: ``/api/logout`` | Method: ``GET``
+
+#### Response
+- ``{Logout Successful}``
+
 ### Update User
 
 URL: ``/api/update`` | Method: ``PUT``
@@ -90,6 +107,13 @@ URL: ``/api/update`` | Method: ``PUT``
 - `Status: 401` : Email is not in database and no such user
 - `Status: 200` : Successfully Registered
 
+### Get User
+
+URL: ``/api/getUser/{id}`` | Method: ``GET``
+
+#### Response
+- `Status: 403` : No such user
+- `Status: 200` : Returns every column of that user row in JSON
 
 ### Create Project
 URL: ``/api/createproject`` | Method: ``POST``
@@ -106,6 +130,18 @@ URL: ``/api/createproject`` | Method: ``POST``
 - `Status: 400` : Undefined behavior and any required field is undefined
 - `Status: 200` : Project Created
 
+
+### Get Project
+
+URL: ``/api/getProject/{id}`` | Method: ``GET``
+
+__Here {id} is the id of an user. This route fetches every project where this user is a contributor.__ 
+
+#### Response
+- `Status: 403` : No such project
+- `Status: 200` : Returns id, name, date_of_creation and user_id of the expected rows in JSON
+
+
 ### Create Folder
 URL: ``/api/createfolder`` | Method: ``POST``
 
@@ -120,6 +156,16 @@ URL: ``/api/createfolder`` | Method: ``POST``
 #### Response
 - `Status: 400` : Undefined behavior and any required field is undefined
 - `Status: 200` : Folder Created
+
+### Get Folder
+URL: ``/api/folders/{id}`` | Method: ``GET``
+
+__Here {id} is the unique folder id._
+
+#### Response
+- `Status: 403` : No such project
+- `Status: 400` : Internal Error
+- `Status 200` :  Returns data of the expected row in JSON
 
 ### Add Author
 
@@ -151,6 +197,16 @@ URL: ``api/chat/send`` | Method: ``POST``
 - `Status: 400` : Undefined behavior and any required field is undefined
 - `Status: 200` : Message Sent Successfully
 
+### Get Message
+URL: ``api/chat/{from}/{to}`` | Method: ``GET``
+
+_Here {from} is the sender user id and {to} is the user id of the receiver_
+
+#### Response
+- `Status 400` : Internal Error
+- `Status 403` : No messages
+- `Status 200`: Returns datetime and message of the expected row in JSON
+
 
 ### Create Blog
 
@@ -180,6 +236,16 @@ URL: ``api/blogs/update/{id}`` | Method: ``POST``
 - `Status: 400` : Undefined behavior and any required field is undefined
 - `Status: 200` : Blog Updated Successfully
 
+### Get Blog
+
+URL: ``api/blog/{id}`` | Method: ``GET``
+
+_Here {id} is the blog id_
+
+#### Response
+- `Status: 403` : No such Blog
+- `Status: 200` : Returns all data from the blog which has the {id} in JSON
+
 ### Add Comment/Reply to a blog
 
 URL: ``api/blogreply`` | Method: ``POST``
@@ -193,3 +259,13 @@ URL: ``api/blogreply`` | Method: ``POST``
 #### Response
 - `Status: 400` : Undefined behavior and any required field is undefined
 - `Status: 200` : Blog Updated Successfully
+
+### Get Comment/Reply
+
+URL: ``api/comments/{blogId}`` | Method: ``GET``
+
+#### Response
+- `Status: 403` : No Comments
+- `Status: 200` : Retuns all comments/replies of the blog with id={blogId} in JSON
+
+
